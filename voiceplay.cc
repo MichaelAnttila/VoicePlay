@@ -42,12 +42,13 @@ int main(void)
 	}
 
 	for (i=0; i<NPACK; i++) {
-		if (recvfrom(s, buf, BUFLEN, 0, reinterpret_cast<sockaddr*>(&si_other), &slen)==-1) {
+		int bytesreceived = recvfrom(s, buf, BUFLEN, 0, reinterpret_cast<sockaddr*>(&si_other), &slen);
+		if (bytesreceived==-1) {
 			printf("recvfrom()\n");
 			return 1;
 		}
-		buf[min(slen, BUFLEN-1)] = 0;
-		printf("Received packet from %s:%d\nData: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
+		buf[min(bytesreceived, BUFLEN-1)] = 0;
+		printf("Received packet from %s:%d\nData: %s\nSize: %d\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf, bytesreceived);
 	}
 
 	close(s);
