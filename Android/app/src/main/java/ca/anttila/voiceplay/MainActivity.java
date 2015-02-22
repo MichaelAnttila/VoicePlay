@@ -48,7 +48,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void submitCommand(View view) throws IOException {
-        String messageText = ((EditText)findViewById(R.id.editText)).getText().toString();
+        EditText editText = (EditText)findViewById(R.id.editText);
+        String messageText = editText.getText().toString();
+        editText.setText("");
         int server_port = 9930;
         DatagramSocket s = new DatagramSocket();
         InetAddress local = InetAddress.getByName("192.168.1.68");
