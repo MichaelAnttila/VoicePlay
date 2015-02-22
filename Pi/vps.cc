@@ -6,8 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#define BUFLEN 512
-#define NPACK 10
 #define PORT 9930
 
 int min(int a, int b)
@@ -22,32 +20,32 @@ int min(int a, int b)
 int main(void)
 {
 	printf("VoicePlay\n");
-	struct sockaddr_in si_me, si_other;
-	int s, i;
-	socklen_t slen=sizeof(si_other);
-	char buf[BUFLEN];
 
-	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
-		printf("socket\n");
+	int s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (s == -1) {
+		printf("Call to socket() failed.\n");
 		return 1;
 	}
 
-	memset((char *) &si_me, 0, sizeof(si_me));
+	struct sockaddr_in si_me = {};
 	si_me.sin_family = AF_INET;
 	si_me.sin_port = htons(PORT);
 	si_me.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (bind(s, reinterpret_cast<sockaddr*>(&si_me), sizeof(si_me))==-1) {
-		printf("bind\n");
+	if (bind(s, reinterpret_cast<sockaddr*>(&si_me), sizeof(si_me)) == -1) {
+		printf("Call to bind() failed.\n");
 		return 1;
 	}
 
-	for (i=0; i<NPACK; i++) {
-		int bytesreceived = recvfrom(s, buf, BUFLEN, 0, reinterpret_cast<sockaddr*>(&si_other), &slen);
-		if (bytesreceived==-1) {
+	while (true) {
+		struct sockaddr_in si_other = {};
+		socklen_t slen = sizeof(si_other);
+		char buf[1024];
+		int bytesreceived = recvfrom(s, buf, sizeof(buf), 0, reinterpret_cast<sockaddr*>(&si_other), &slen);
+		if (bytesreceived == -1) {
 			printf("recvfrom()\n");
 			return 1;
 		}
-		buf[min(bytesreceived, BUFLEN-1)] = 0;
+		buf[min(bytesreceived, sizeof(buf)-1)] = 0;
 		printf("Received packet from %s:%d\nData: %s\nSize: %d\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf, bytesreceived);
 	}
 

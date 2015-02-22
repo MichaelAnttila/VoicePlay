@@ -1,2 +1,2 @@
 all:
-	g++ -Wall voiceplayserver.cc -o voiceplayserver
+	g++ -Wall vps.cc -o voiceplayserver
