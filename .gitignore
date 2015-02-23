@@ -5,4 +5,4 @@
 .DS_Store
 /Android/build
 voiceplayserver
-.o
+*.o
