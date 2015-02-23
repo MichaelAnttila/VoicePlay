@@ -1,6 +1,8 @@
 #ifndef LOG_H_INCLUDED
 #define LOG_H_INCLUDED
 
+#include <stdarg.h>
+
 namespace VoicePlay {
 
 class Log
