@@ -33,7 +33,6 @@ int main(void)
 		log->Error("Error: Could not create UDP object.");
 		return 4;
 	}
-
 	while (true) {
 		char buf[1024];
 		if (!udp->Receive(buf, sizeof(buf))) {
@@ -41,7 +40,9 @@ int main(void)
 			return 5;
 		}
 		log->Info("Received packet: %s", buf);
+		std::shared_ptr<VoicePlay::MP3> mp3 = std::shared_ptr<VoicePlay::MP3>(VoicePlay::MP3::Create(log, audio, "/mnt/usb/Susan Aili/7 Northern Song.mp3"));
+		while (mp3->Play()) {
+		}
 	}
-
 	return 0;
 }

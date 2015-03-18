@@ -35,7 +35,7 @@ Audio* Audio::Create(std::shared_ptr<Log> log)
 	return result;
 }
 
-bool Audio::Open(int bytespersample, int rate, int channels)
+bool Audio::Open(int const bytespersample, int const rate, int const channels)
 {
 	if (m_device) {
 		Close();
@@ -50,6 +50,15 @@ bool Audio::Open(int bytespersample, int rate, int channels)
 	m_device = ao_open_live(driver, &format, 0);
 	if (!m_device) {
 		m_log->Info("Audio::Open could not open the output stream.");
+		return false;
+	}
+	return true;
+}
+
+bool Audio::Play(char* const buffer, int const size)
+{
+	if (!ao_play(m_device, buffer, size)) {
+		m_log->Info("Audio::Play encountered an error.");
 		return false;
 	}
 	return true;

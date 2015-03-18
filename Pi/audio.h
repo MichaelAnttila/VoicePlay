@@ -13,7 +13,8 @@ public:
 	Audio();
 	~Audio();
 	static Audio* Create(std::shared_ptr<Log> log);
-	bool Open(int bytespersample, int rate, int channels);
+	bool Open(int const bytespersample, int const rate, int const channels);
+	bool Play(char* const buffer, int const size);
 	void Close();
 private:
 	bool Initialize(std::shared_ptr<Log> log);

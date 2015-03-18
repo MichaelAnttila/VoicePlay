@@ -36,7 +36,7 @@ void Log::Error(char const* const format, ...)
 
 void Log::Write(char const* const format, va_list valist)
 {
-	printf(format, valist);
+	vprintf(format, valist);
 	printf("\n");
 }
 
