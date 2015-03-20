@@ -64,7 +64,7 @@ MP3::~MP3()
 	}
 }
 
-MP3* MP3::Create(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, char const* const filename)
+MP3* MP3::Create(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, std::string const filename)
 {
 	MP3* result = new MP3();
 	if (!result || !result->Initialize(log, audio, filename)) {
@@ -90,7 +90,7 @@ bool MP3::Play()
 	return true;
 }
 
-bool MP3::Initialize(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, char const* const filename)
+bool MP3::Initialize(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, std::string const filename)
 {
 	m_log = log;
 	m_audio = audio;
@@ -106,9 +106,9 @@ bool MP3::Initialize(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, cha
 		m_log->Info("MP3::Initialize: Out of memory.");
 		return false;
 	}
-	error = mpg123_open(m_mp3, filename);
+	error = mpg123_open(m_mp3, filename.c_str());
 	if (error != MPG123_OK) {
-		m_log->Info("MP3::Initialize: Could not open file (%s) - mpg123_open returned (%s).", filename, mpg123_plain_strerror(error));
+		m_log->Info("MP3::Initialize: Could not open file (%s) - mpg123_open returned (%s).", filename.c_str(), mpg123_plain_strerror(error));
 		return false;
 	}
 	int channels = 0;
@@ -116,7 +116,7 @@ bool MP3::Initialize(std::shared_ptr<Log> log, std::shared_ptr<Audio> audio, cha
 	long rate = 0;
 	error = mpg123_getformat(m_mp3, &rate, &channels, &encoding);
 	if (error != MPG123_OK) {
-		m_log->Info("MP3::Initialize: Could not get format for file (%s) - mpg123_getformat returned (%s).", filename, mpg123_plain_strerror(error));
+		m_log->Info("MP3::Initialize: Could not get format for file (%s) - mpg123_getformat returned (%s).", filename.c_str(), mpg123_plain_strerror(error));
 		return false;
 	}
 	if (!m_audio->Open(mpg123_encsize(encoding), rate, channels)) {
