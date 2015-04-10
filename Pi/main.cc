@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <memory>
+#include <strings.h>
 #include "log.h"
 #include "udp.h"
 #include "audio.h"
@@ -36,22 +37,37 @@ int main(void)
 		log->Error("Error: Could not create directory object.");
 		return 5;
 	}
+	std::shared_ptr<VoicePlay::MP3> mp3 = 0;
+	std::deque<std::string> playlist = std::deque<std::string>();
 	while (true) {
-		char buf[1024];
-		if (!udp->Receive(buf, sizeof(buf))) {
-			log->Error("Error: Encountered an error while trying to read data from the network.");
-			return 6;
-		}
-		log->Info("Received packet: %s", buf);
-		std::vector<std::string> playlist = directory->Match(buf);
-		if (!playlist.empty()) {
-			log->Info("Playing %s", playlist[0].c_str());
-			std::shared_ptr<VoicePlay::MP3> mp3 = std::shared_ptr<VoicePlay::MP3>(VoicePlay::MP3::Create(log, audio, playlist[0]));
-			if (!mp3) {
-				log->Error("Error: Could not play file.");
-				continue;
+		if (udp->Select(!mp3 && playlist.empty())) {
+			char buf[1024];
+			if (!udp->Receive(buf, sizeof(buf))) {
+				log->Error("Error: Encountered an error while trying to read data from the network.");
+				return 6;
 			}
-			while (mp3->Play()) {
+			log->Info("Received packet: %s", buf);
+			if (strcasecmp(buf, "skip") == 0 && !playlist.empty()) {
+				mp3 = 0;
+			} else {
+				playlist = directory->Match(buf);
+				mp3 = 0;
+			}
+		}
+		if (mp3) {
+			if (!mp3->Play()) {
+				mp3 = 0;
+			}
+		}
+		if (!mp3) {
+			while (!playlist.empty()) {
+				log->Info("Playing %s", playlist[0].c_str());
+				mp3 = std::shared_ptr<VoicePlay::MP3>(VoicePlay::MP3::Create(log, audio, playlist[0]));
+				if (!mp3) {
+					log->Error("Error: Could not open file.");
+				}
+				playlist.pop_front();
+				break;
 			}
 		}
 	}

@@ -38,9 +38,9 @@ bool CaseInsensitiveFind(std::string const& a, std::string const& b)
 	return (it != a.end());
 }
 
-std::vector<std::string> Directory::Match(std::string const keywords)
+std::deque<std::string> Directory::Match(std::string const keywords)
 {
-	std::vector<std::string> result;
+	std::deque<std::string> result;
 	for (auto it: m_filenames) {
 		if (CaseInsensitiveFind(it, keywords)) {
 			std::string fullpath = m_path;

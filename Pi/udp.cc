@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include "udp.h"
@@ -46,6 +45,21 @@ UDP* UDP::Create(std::shared_ptr<Log> log, unsigned short const port)
 	return result;
 }
 
+bool UDP::Select(bool const block)
+{
+	fd_set fdset = m_fdset;
+	timeval timeout = {};
+	int result = select(m_socket+1, &fdset, 0, 0, block ? 0 : &timeout);
+	if (result == -1) {
+		m_log->Info("UDP::Select: Call to select() failed.\n");
+		return false;
+	} else if (result) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool UDP::Receive(char* const buffer, unsigned int const buffersize)
 {
 	int bytesreceived = recv(m_socket, buffer, buffersize, 0);
@@ -73,6 +87,8 @@ bool UDP::Initialize(std::shared_ptr<Log> log, unsigned short const port)
 		m_log->Info("UDP::Initialize: Call to bind() failed.");
 		return false;
 	}
+	FD_ZERO(&m_fdset);
+	FD_SET(m_socket, &m_fdset);
 	return true;
 }
 
