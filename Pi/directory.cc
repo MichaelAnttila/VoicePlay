@@ -41,7 +41,7 @@ bool CaseInsensitiveFind(std::string const& a, std::string const& b)
 std::deque<std::string> Directory::Match(std::string const keywords)
 {
 	std::deque<std::string> result;
-	for (auto it: m_filenames) {
+	for (auto it : m_filenames) {
 		if (CaseInsensitiveFind(it, keywords)) {
 			std::string fullpath = m_path;
 			fullpath.append("/");

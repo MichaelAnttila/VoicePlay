@@ -47,7 +47,10 @@ int main(void)
 				return 6;
 			}
 			log->Info("Received packet: %s", buf);
-			if (strcasecmp(buf, "skip") == 0 && !playlist.empty()) {
+			if (strcasecmp(buf, "skip") == 0 && (!playlist.empty() || mp3)) {
+				mp3 = 0;
+			} else if (strcasecmp(buf, "stop") == 0 && (!playlist.empty() || mp3)) {
+				playlist.clear();
 				mp3 = 0;
 			} else {
 				playlist = directory->Match(buf);
