@@ -38,16 +38,53 @@ bool CaseInsensitiveFind(std::string const& a, std::string const& b)
 	return (it != a.end());
 }
 
+static std::vector<std::string> Split(std::string const input)
+{
+	std::vector<std::string> result;
+	char const* i = input.c_str();
+	char temp[256];
+	int index = 0;
+	while (true) {
+		if (*i == 0 || *i == ' ' || *i == '-' || *i == '.') {
+			if (index > 0) {
+				temp[index] = 0;
+				result.push_back(temp);
+				index = 0;
+			}
+			if (*i == 0) {
+				break;
+			}
+		} else {
+			temp[index] = *i;
+			index++;
+		}	
+		i++;
+	}
+	return result;
+}
+
 std::deque<std::string> Directory::Match(std::string const keywords)
 {
+	std::vector<std::string> keys = Split(keywords); 
 	std::deque<std::string> result;
-	for (auto it : m_filenames) {
-		if (CaseInsensitiveFind(it, keywords)) {
-			std::string fullpath = m_path;
-			fullpath.append("/");
-			fullpath.append(it);
-			result.push_back(fullpath);
+	std::vector<FileName> filenames = m_filenames;
+	for (auto kt : keys) {
+		std::vector<FileName> matchingfilenames;
+		for (auto ft : filenames) {
+			for (auto tt = ft.tokens.begin(); tt != ft.tokens.end(); tt++) {
+				if (CaseInsensitiveFind(*tt, kt)) {
+					ft.tokens.erase(tt);
+					matchingfilenames.push_back(ft);	
+				}
+			}
 		}
+		filenames = matchingfilenames;
+	}
+	for (auto ft : filenames) {
+		std::string fullpath = m_path;
+		fullpath.append("/");
+		fullpath.append(ft.name);
+		result.push_back(fullpath);
 	}
 	return result;
 }
@@ -69,7 +106,10 @@ bool Directory::Initialize(std::shared_ptr<Log> log, std::string const path)
 		if (dirent->d_name[0] == '.') {
 			continue;
 		}
-		m_filenames.push_back(dirent->d_name);
+		FileName filename = {};
+		filename.name = dirent->d_name;
+		filename.tokens = Split(filename.name);
+		m_filenames.push_back(filename);
 	}
 	if (closedir(dir)) {
 		m_log->Info("Directory::Initialize: Could not close directory (%s).", m_path.c_str());

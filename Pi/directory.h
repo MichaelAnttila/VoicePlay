@@ -20,7 +20,12 @@ private:
 	bool Initialize(std::shared_ptr<Log> log, std::string const path);
 	std::shared_ptr<Log> m_log;
 	std::string m_path;
-	std::vector<std::string> m_filenames;
+	struct FileName
+	{
+		std::string name;
+		std::vector<std::string> tokens;
+	};
+	std::vector<FileName> m_filenames;
 };
 
 }
