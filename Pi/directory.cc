@@ -96,6 +96,7 @@ std::deque<Directory::Result> Directory::Match(std::string const keywords)
 	}
 	std::deque<Directory::Result> results;
 	for (auto it : interimresults) {
+		m_log->Info("Matched: %s, score %d", it.filename.name.c_str(), it.score);
 		std::string fullpath = m_path;
 		fullpath.append("/");
 		fullpath.append(it.filename.name);

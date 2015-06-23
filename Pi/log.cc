@@ -6,10 +6,14 @@ namespace VoicePlay
 
 Log::Log()
 {
+	m_output = fopen("/home/pi/vp.log", "a");
 }
 
 Log::~Log()
 {
+	if (m_output) {
+		fclose(m_output);
+	}
 }
 
 Log* Log::Create()
@@ -38,6 +42,11 @@ void Log::Write(char const* const format, va_list valist)
 {
 	vprintf(format, valist);
 	printf("\n");
+	if (m_output) {
+		vfprintf(m_output, format, valist);
+		fprintf(m_output, "\n");
+		fflush(m_output);
+	}
 }
 
 }

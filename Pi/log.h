@@ -15,6 +15,7 @@ public:
 	void Error(char const* const format, ...);
 private:
 	void Write(char const* const format, va_list args);
+	FILE* m_output;
 };
 
 }
