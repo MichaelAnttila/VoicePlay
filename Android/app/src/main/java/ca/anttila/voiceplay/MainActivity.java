@@ -59,4 +59,26 @@ public class MainActivity extends ActionBarActivity {
         DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
         s.send(p);
     }
+
+    public void skipCommand(View view) throws IOException {
+        String messageText = "SKIP";
+        int server_port = 9930;
+        DatagramSocket s = new DatagramSocket();
+        InetAddress local = InetAddress.getByName("192.168.1.68");
+        int msg_length = messageText.length();
+        byte[] message = messageText.getBytes();
+        DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
+        s.send(p);
+    }
+
+    public void stopCommand(View view) throws IOException {
+        String messageText = "STOP";
+        int server_port = 9930;
+        DatagramSocket s = new DatagramSocket();
+        InetAddress local = InetAddress.getByName("192.168.1.68");
+        int msg_length = messageText.length();
+        byte[] message = messageText.getBytes();
+        DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
+        s.send(p);
+    }
 }
