@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <dirent.h>
+#include <strings.h>
 #include "directory.h"
 
 namespace VoicePlay
@@ -63,30 +64,45 @@ static std::vector<std::string> Split(std::string const input)
 	return result;
 }
 
-std::deque<std::string> Directory::Match(std::string const keywords)
+std::deque<Directory::Result> Directory::Match(std::string const keywords)
 {
 	std::vector<std::string> keys = Split(keywords); 
-	std::deque<std::string> result;
-	std::vector<FileName> filenames = m_filenames;
+	struct InterimResult
+	{
+		FileName filename;
+		int score;
+	};
+	std::vector<InterimResult> interimresults;
+	for (auto it : m_filenames) {
+		InterimResult result = {it, 0};
+		interimresults.push_back(result);
+	}
 	for (auto kt : keys) {
-		std::vector<FileName> matchingfilenames;
-		for (auto ft : filenames) {
-			for (auto tt = ft.tokens.begin(); tt != ft.tokens.end(); tt++) {
-				if (CaseInsensitiveFind(*tt, kt)) {
-					ft.tokens.erase(tt);
-					matchingfilenames.push_back(ft);	
+		std::vector<InterimResult> matchingresults;
+		for (auto it : interimresults) {
+			for (auto tt = it.filename.tokens.begin(); tt != it.filename.tokens.end(); tt++) {
+				if (strcasecmp(tt->c_str(), kt.c_str()) == 0) {
+					it.filename.tokens.erase(tt);
+					it.score += 3;
+					matchingresults.push_back(it);	
+				} else if (CaseInsensitiveFind(*tt, kt)) {
+					it.filename.tokens.erase(tt);
+					it.score += 1;
+					matchingresults.push_back(it);	
 				}
 			}
 		}
-		filenames = matchingfilenames;
+		interimresults = matchingresults;
 	}
-	for (auto ft : filenames) {
+	std::deque<Directory::Result> results;
+	for (auto it : interimresults) {
 		std::string fullpath = m_path;
 		fullpath.append("/");
-		fullpath.append(ft.name);
-		result.push_back(fullpath);
+		fullpath.append(it.filename.name);
+		Directory::Result result = {fullpath, it.score};
+		results.push_back(result);
 	}
-	return result;
+	return results;
 }
 
 bool Directory::Initialize(std::shared_ptr<Log> log, std::string const path)

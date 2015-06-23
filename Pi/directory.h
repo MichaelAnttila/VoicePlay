@@ -15,7 +15,12 @@ public:
 	Directory();
 	~Directory();
 	static Directory* Create(std::shared_ptr<Log> log, std::string const path);
-	std::deque<std::string> Match(std::string const keywords);
+	struct Result
+	{
+		std::string filename;
+		int score;
+	};
+	std::deque<Result> Match(std::string const keywords);
 private:
 	bool Initialize(std::shared_ptr<Log> log, std::string const path);
 	std::shared_ptr<Log> m_log;

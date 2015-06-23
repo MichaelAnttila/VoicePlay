@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <memory>
 #include <strings.h>
+#include <algorithm>
 #include "log.h"
 #include "udp.h"
 #include "audio.h"
@@ -8,6 +9,11 @@
 #include "directory.h"
 
 #define PORT 9930
+
+bool ScoreCompare(VoicePlay::Directory::Result a, VoicePlay::Directory::Result b)
+{
+	return a.score > b.score;
+}
 
 int main(void)
 {
@@ -38,7 +44,7 @@ int main(void)
 		return 5;
 	}
 	std::shared_ptr<VoicePlay::MP3> mp3 = 0;
-	std::deque<std::string> playlist = std::deque<std::string>();
+	std::deque<VoicePlay::Directory::Result> playlist = std::deque<VoicePlay::Directory::Result>();
 	while (true) {
 		if (udp->Select(!mp3 && playlist.empty())) {
 			char buf[1024];
@@ -54,6 +60,7 @@ int main(void)
 				mp3 = 0;
 			} else {
 				playlist = directory->Match(buf);
+				std::sort(playlist.begin(), playlist.end(), ScoreCompare);
 				mp3 = 0;
 			}
 		}
@@ -64,8 +71,8 @@ int main(void)
 		}
 		if (!mp3) {
 			while (!playlist.empty()) {
-				log->Info("Playing %s", playlist[0].c_str());
-				mp3 = std::shared_ptr<VoicePlay::MP3>(VoicePlay::MP3::Create(log, audio, playlist[0]));
+				log->Info("Playing %s, score %d", playlist[0].filename.c_str(), playlist[0].score);
+				mp3 = std::shared_ptr<VoicePlay::MP3>(VoicePlay::MP3::Create(log, audio, playlist[0].filename));
 				if (!mp3) {
 					log->Error("Error: Could not open file.");
 				}
